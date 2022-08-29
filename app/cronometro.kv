@@ -1,0 +1,45 @@
+<SetTime>:
+    value: txt.text
+    id: card
+    size_hint: .7, .3
+    pos_hint: {'center_x': .5,'center_y': .5}
+    
+    MDTextField:
+        id: txt
+        text: root.value
+        hint_text: "Quantos Minutos?"
+        max_text_length: 2
+        on_text_validate: root.fechar()
+
+<Pomodoro>:
+    MDIconButton:
+        icon: 'timer'
+        size_hint: .4, .3
+        icon_size: "100sp"
+        pos_hint: {'center_x': .5, 'center_y': .8}
+        on_release: root.setTime()
+
+    MDTextButton:
+        text: root.timer_string
+        font_style: 'H1'
+        custom_color: 0, 1, 0, 1
+        pos_hint: {'center_x': .5, 'center_y': .5}
+        on_release: root.setTime()
+        
+    MDRaisedButton:
+        text: root.button_string
+        size_hint_x: .5
+        size_hint_y: .1
+        pos_hint: {'center_x': .5, 'center_y': .2}
+        on_release: root.click()
+    
+MDBoxLayout:
+    orientation: 'vertical'
+    
+    MDTopAppBar:
+        title: 'Cronômetro'
+        left_action_items: [['menu']]
+        right_action_items: [['dots-vertical']]
+        right_action_items: [['theme-light-dark', lambda x: app.change_color()]]
+
+    Pomodoro:
