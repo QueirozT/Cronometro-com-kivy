@@ -7,8 +7,14 @@
     MDTextField:
         id: txt
         text: root.value
-        hint_text: "Quantos Minutos?"
-        max_text_length: 2
+        font_size: '64sp'
+        halign: "center"
+        # hint_text: "Minutos : Segundos"
+        helper_text: "00:00"
+        text: "00:00"
+        required: True
+        max_text_length: 5
+        pos_hint: {'center_x': .5, 'center_y': .6}
         on_text_validate: root.fechar()
 
 <Pomodoro>:
