@@ -36,6 +36,8 @@ RUN apt-get update -qq > /dev/null \
     build-essential \
     gettext \
     patch \
+    adb \
+    scrcpy \
     sudo
 
 ENV USER="user"
@@ -84,4 +86,11 @@ CMD buildozer android debug
 # docker run -it -v $PWD:/home/user/buildozer/ --name build queirozt/kivy-buildozer
 
 ## Para compilar e rodar no scrcpy (ou outro emulador):
-# docker run -it --privileged -v $PWD:/home/user/buildozer/ -v /dev/bus/usb:/dev/bus/usb -v /etc/udev/rules.d/:/etc/udev/rules.d/ --name build queirozt/kivy-buildozer buildozer android debug deploy run logcat
+# docker run -it --privileged --name build \
+#     -v $HOME/.Xauthority:/root/.Xauthority \
+#     -v $PWD:/home/user/buildozer/ \
+#     -v /dev/bus/usb:/dev/bus/usb \
+#     -v /tmp/.X11-unix:/tmp/.X11-unix \
+#     --net=host -e DISPLAY=$DISPLAY \
+#     queirozt/kivy-buildozer \
+#     buildozer android debug deploy run logcat
