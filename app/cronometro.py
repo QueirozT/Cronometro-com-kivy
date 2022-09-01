@@ -1,5 +1,6 @@
 import sys
 from itertools import cycle
+from threading import Thread
         
 from kivy.lang import Builder
 from kivy.clock import Clock
@@ -7,7 +8,8 @@ from kivy.properties import StringProperty, BooleanProperty
 from kivymd.app import MDApp
 from kivymd.uix.card import MDCard
 from kivymd.uix.floatlayout import MDFloatLayout
-from plyer import notification
+
+from plyer import notification, vibrator
 
 
 class Cycle:
@@ -25,7 +27,7 @@ class Cycle:
 class Timer:
     """Cria a Lógica do Timer"""
     def __init__(self, time):
-        self.time = time * 60
+        self.time = time
         
     def decrementar(self):
         self.time -= 1
@@ -37,12 +39,22 @@ class Timer:
 
 class SetTime(MDCard):
     value = StringProperty('')
+
     def fechar(self):
-        if self.value.isnumeric():
-            self.parent.cycle = cycle([Timer(int(self.value))])
+        try:
+            min, sec = self.value.split(':')
+            min = 0 if len(min) == 0 else int(min)
+            sec = 0 if len(sec) == 0 else int(sec)
+        except:
+            pass
+        else:
+            value = min * 60 + sec
+
+            self.parent.cycle = cycle([Timer(value)])
             self.parent.timer_string = str(self.parent.cycle.__next__())
             self.parent._time = self.parent.cycle.__next__()
-        self.parent.remove_widget(self)
+        finally:
+            self.parent.remove_widget(self)
 
 
 class Pomodoro(MDFloatLayout):
@@ -68,7 +80,7 @@ class Pomodoro(MDFloatLayout):
         if self.timer_string == '00:00':
             self.cycle = cycle([Timer(0)])
             self.setTime()
-    
+
     def stop(self):
         self.button_string = 'Iniciar'
         if self.running:
@@ -88,7 +100,15 @@ class Pomodoro(MDFloatLayout):
             self.stop()
             self._time = next(self.cycle)
             self.timer_string = '00:00'
-            notification.notify('Alerta','O tempo acabou!')
+            self.notify()
+
+    def notify(self):
+        notification.notify(
+            title="Alerta", 
+            message="O tempo acabou!"
+        )
+        vibrator.vibrate(time=2)
+
 
 
 class MeuApp(MDApp):
