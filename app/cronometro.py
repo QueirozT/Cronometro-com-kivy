@@ -7,7 +7,7 @@ from kivy.properties import StringProperty, BooleanProperty
 from kivymd.app import MDApp
 from kivymd.uix.card import MDCard
 from kivymd.uix.floatlayout import MDFloatLayout
-from plyer import vibrator, notification
+from plyer import notification
 
 
 class Cycle:
@@ -88,9 +88,7 @@ class Pomodoro(MDFloatLayout):
             self.stop()
             self._time = next(self.cycle)
             self.timer_string = '00:00'
-            if sys.platform != 'win32' and sys.platform != 'linux':
-                vibrator.vibrate(1)
-                notification.notify('Alerta','O tempo acabou!')
+            notification.notify('Alerta','O tempo acabou!')
 
 
 class MeuApp(MDApp):
