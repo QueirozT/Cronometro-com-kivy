@@ -1,0 +1,150 @@
+###############################################################################
+# Dockerfile for the web app
+
+FROM python:3.10 as poetry-base
+
+RUN apt-get update && apt-get install -y curl
+
+# https://python-poetry.org/docs/master/#installation
+ENV POETRY_VERSION=1.1.14
+
+RUN curl -sSL https://install.python-poetry.org | python3 - --version "$POETRY_VERSION"
+
+# See "Add Poetry to your PATH" in https://python-poetry.org/docs/master/#installing-with-the-official-installer
+ENV PATH="/root/.local/bin:$PATH"
+
+FROM poetry-base as example-app
+
+WORKDIR /app
+
+COPY poetry.lock pyproject.toml ./
+
+# Configure virtualenv location inside project
+RUN poetry config virtualenvs.in-project true --local
+
+RUN poetry install --no-dev
+
+COPY . /app
+
+EXPOSE 5000
+CMD [ "poetry", "run", "python", "-m", "flask", "run", "--host=0.0.0.0" ]
+
+
+###############################################################################
+# Dockerfile example for apps python
+
+FROM python:3.10
+
+RUN apt-get update && apt-get install -y curl
+
+# Set Poetry Version
+ENV POETRY_VERSION=1.1.14
+
+# Install Poetry
+RUN curl -sSL https://install.python-poetry.org | python3 - --version $POETRY_VERSION
+
+# Add poetry install location to PATH
+ENV PATH=/root/.local/bin:$PATH
+
+WORKDIR /
+
+COPY poetry.lock pyproject.toml ./
+
+RUN poetry config virtualenvs.in-project true --local
+
+RUN poetry install --no-dev
+
+COPY . .
+
+CMD [ "poetry", "run", "python", "-c", "print('hello world')" ]
+
+
+###############################################################################
+# Dockerfile for other apps
+
+FROM ubuntu
+
+RUN apt-get update \
+&& apt-get install -y curl \
+&& apt-get install -y python3.10 \
+&& apt-get install -y python3-pip
+
+ENV POETRY_VERSION=1.1.14
+
+RUN curl -sSL https://install.python-poetry.org | python3 - --version $POETRY_VERSION
+
+ENV PATH=/home/$USER/.local/bin:$PATH
+# ENV PATH=/root/.local/bin:$PATH
+
+RUN apt-get update && \
+    apt-get install -y openjdk-11-jdk ca-certificates-java && \
+    apt-get clean && \
+    update-ca-certificates -f
+
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
+
+RUN export JAVA_HOME
+
+WORKDIR /home/$USER/app
+
+COPY poetry.lock pyproject.toml /home/$USER/app/
+
+RUN poetry config virtualenvs.in-project true --local
+
+RUN poetry install
+
+COPY . /home/$USER/app
+
+CMD [ "poetry","shell"]
+
+
+###############################################################################
+# Dockerfile for buildozer app
+
+FROM ubuntu
+
+RUN apt-get update \
+&& apt-get install -y curl \
+&& apt-get install -y python3.10 \
+&& apt-get install -y python3-pip \
+&& apt-get install -y git \
+&& apt-get install -y zip \
+&& apt-get install -y unzip \
+&& apt-get install -y openjdk-11-jdk \
+&& apt-get install -y autoconf \
+&& apt-get install -y libtool \
+&& apt-get install -y pkg-config \
+&& apt-get install -y zlib1g-dev \
+&& apt-get install -y libncurses5-dev \
+&& apt-get install -y libncursesw5-dev \
+&& apt-get install -y libtinfo5 \
+&& apt-get install -y cmake \
+&& apt-get install -y libffi-dev \
+&& apt-get install -y libssl-dev 
+
+ENV PATH=/home/$USER/.local/bin:$PATH
+
+RUN python3 -m pip install --upgrade pip --user
+
+RUN python3 -m pip install buildozer cython virtualenv
+
+WORKDIR /app
+
+
+### PROCESSOS DE BUILD DO PROJETO ###
+
+# docker build -t buildozer . ## Buildando a imagem
+
+# docker run -it --name build buildozer ## Rodando a imagem
+
+# >>> exit  ## Saindo da imagem
+
+# docker cp . build:/app ## Copiando o projeto para a imagem
+
+# docket start build ## Rodando novamente a imagem
+
+# docker exec -it build python3 -m buildozer android debug ## Rodando o buildozer
+
+# docker cp build:/app/bin/ . ## Copiando o binario para o diretorio do projeto
+
+# docker exec -it build python3 -m buildozer android debug run ## Rodando o buildozer no meu "scrcpy"
